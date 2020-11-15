@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+# An hook script to verify what is about to be committed.
+# Called by "git commit" with no arguments.  The hook should
+# exit with non-zero status after issuing an appropriate message if
+# it wants to stop the commit.
+
+echo "go fmt ./...\n"
+go fmt ./... || exit 1
+
+echo "go vet ./...\n"
+go vet ./... || exit 1
