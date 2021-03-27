@@ -5,8 +5,19 @@
 # exit with non-zero status after issuing an appropriate message if
 # it wants to stop the commit.
 
-echo "go fmt ./...\n"
-go fmt ./... || exit 1
+local="$(git rev-parse --abbrev-ref HEAD)"
+remote="$(git branch -r -vv | grep -- '->' | awk '{print $3}')"
+gofiles="$(git diff --cached --name-only --diff-filter=ACM | grep \\.go | xargs)"
 
-echo "go vet ./...\n"
-go vet ./... || exit 1
+echo "Working on ${local}"
+
+if [ -n "${gofiles}" ]; then
+    echo "Running go fmt ${gofiles}"
+    if [ -n "$(go fmt ${gofiles})" ]; then
+        echo 'The above go files in the stage area to be formatted, please add them again then commit.'
+        exit 1
+    fi
+
+    echo "Running go vet ./...\n"
+    go vet ./... || exit 1
+fi

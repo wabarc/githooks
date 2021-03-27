@@ -4,4 +4,14 @@
 # push" after it has checked the remote status, but before anything has been
 # pushed.  If this script exits with a non-zero status nothing will be pushed.
 
-go test -v ./... || exit 1
+local="$(git rev-parse --abbrev-ref HEAD)"
+remote="$(git branch -r -vv | grep -- '->' | awk '{print $3}')"
+gofiles="$(git diff ${local} ${remote} --name-only --diff-filter=ACM | grep \\.go | xargs)"
+
+echo "Working on ${local}"
+echo "Prepare to diff ${local}...${remote}"
+
+if [ -n "${gofiles}" ]; then
+    echo "Running go test -v ./...\n"
+    go test -v ./... || exit 1
+fi
